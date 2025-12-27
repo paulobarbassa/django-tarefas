@@ -50,4 +50,6 @@ class TarefasConfig(AppConfig):
         Exemplo de uso com signals:
             from . import signals  # Importa os handlers de signals
         """
-        pass  # Não precisamos de nada especial por enquanto
+        # Importa os signals para registrar os receivers
+        # Isso conecta o signal post_migrate que popula o banco com tarefas de estudo
+        from . import signals  # noqa: F401
