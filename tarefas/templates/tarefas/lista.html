@@ -1,0 +1,256 @@
+<!--
+=============================================================================
+LISTA.HTML - Listagem de Tarefas com Filtros
+=============================================================================
+
+Página que lista todas as tarefas com opções de filtro.
+Demonstra loops, condições e parâmetros de URL.
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}Lista de Tarefas{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h1>
+            <i class="bi bi-list-task"></i> 
+            Lista de Tarefas
+        </h1>
+    </div>
+    <div class="col-auto">
+        <a href="{% url 'criar_tarefa' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nova Tarefa
+        </a>
+    </div>
+</div>
+
+<!-- 
+=================================================================
+FILTROS
+=================================================================
+Formulário de filtro usando método GET (parâmetros na URL)
+-->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" action="{% url 'lista_tarefas' %}" class="row g-3">
+            <!-- Filtro por Status -->
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <!-- 
+                    {% if variavel == 'valor' %}selected{% endif %}
+                    Marca a opção selecionada baseado no filtro atual
+                    -->
+                    <option value="todas" {% if filtro_status == 'todas' %}selected{% endif %}>
+                        Todas
+                    </option>
+                    <option value="pendentes" {% if filtro_status == 'pendentes' %}selected{% endif %}>
+                        Pendentes
+                    </option>
+                    <option value="concluidas" {% if filtro_status == 'concluidas' %}selected{% endif %}>
+                        Concluídas
+                    </option>
+                </select>
+            </div>
+            
+            <!-- Filtro por Prioridade -->
+            <div class="col-md-3">
+                <label class="form-label">Prioridade</label>
+                <select name="prioridade" class="form-select">
+                    <option value="">Todas</option>
+                    <option value="alta" {% if filtro_prioridade == 'alta' %}selected{% endif %}>
+                        🔴 Alta
+                    </option>
+                    <option value="media" {% if filtro_prioridade == 'media' %}selected{% endif %}>
+                        🟡 Média
+                    </option>
+                    <option value="baixa" {% if filtro_prioridade == 'baixa' %}selected{% endif %}>
+                        🟢 Baixa
+                    </option>
+                </select>
+            </div>
+            
+            <!-- Filtro por Categoria -->
+            <div class="col-md-3">
+                <label class="form-label">Categoria</label>
+                <select name="categoria" class="form-select">
+                    <option value="">Todas</option>
+                    <!-- Loop sobre categorias vindas do contexto -->
+                    {% for categoria in categorias %}
+                        <!-- 
+                        |stringformat:"s": converte para string (para comparação)
+                        categoria.pk|stringformat:"s" converte o ID para string
+                        -->
+                        <option value="{{ categoria.pk }}" 
+                                {% if filtro_categoria == categoria.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ categoria.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <!-- Botões -->
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="bi bi-search"></i> Filtrar
+                </button>
+                <a href="{% url 'lista_tarefas' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-x"></i> Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 
+=================================================================
+LISTA DE TAREFAS
+=================================================================
+-->
+<div class="card">
+    <div class="card-body">
+        {% if tarefas %}
+            <!-- 
+            TABELA RESPONSIVA
+            Usando Bootstrap para tabela responsiva
+            -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 50px;">Status</th>
+                            <th>Tarefa</th>
+                            <th>Categoria</th>
+                            <th>Prioridade</th>
+                            <th>Data Limite</th>
+                            <th style="width: 150px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tarefa in tarefas %}
+                            <tr class="{% if tarefa.concluida %}table-success{% elif tarefa.esta_atrasada %}table-danger{% endif %}">
+                                <!-- Status (checkbox visual) -->
+                                <td class="text-center">
+                                    <a href="{% url 'alternar_status' tarefa.pk %}" 
+                                       class="text-decoration-none"
+                                       title="{% if tarefa.concluida %}Marcar como pendente{% else %}Marcar como concluída{% endif %}">
+                                        {% if tarefa.concluida %}
+                                            <i class="bi bi-check-circle-fill text-success fs-4"></i>
+                                        {% else %}
+                                            <i class="bi bi-circle text-muted fs-4"></i>
+                                        {% endif %}
+                                    </a>
+                                </td>
+                                
+                                <!-- Título e descrição -->
+                                <td>
+                                    <a href="{% url 'detalhe_tarefa' tarefa.pk %}" 
+                                       class="text-decoration-none fw-bold {% if tarefa.concluida %}text-muted text-decoration-line-through{% endif %}">
+                                        {{ tarefa.titulo }}
+                                    </a>
+                                    {% if tarefa.descricao %}
+                                        <br>
+                                        <small class="text-muted">
+                                            <!-- 
+                                            |truncatewords:N: exibe apenas N palavras
+                                            |truncatechars:N: exibe apenas N caracteres
+                                            -->
+                                            {{ tarefa.descricao|truncatewords:10 }}
+                                        </small>
+                                    {% endif %}
+                                    {% if tarefa.esta_atrasada %}
+                                        <span class="badge bg-danger ms-1">Atrasada!</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Categoria -->
+                                <td>
+                                    {% if tarefa.categoria %}
+                                        <span class="badge bg-{{ tarefa.categoria.cor }}">
+                                            {{ tarefa.categoria.nome }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Prioridade -->
+                                <td>
+                                    {{ tarefa.emoji_prioridade }}
+                                    <!-- 
+                                    get_CAMPO_display(): método automático do Django
+                                    Retorna o label do choice em vez do valor
+                                    -->
+                                    {{ tarefa.get_prioridade_display }}
+                                </td>
+                                
+                                <!-- Data Limite -->
+                                <td>
+                                    {% if tarefa.data_limite %}
+                                        <!-- 
+                                        |date:"formato": formata datas
+                                        Formatos comuns:
+                                        - "d/m/Y": 25/12/2024
+                                        - "d M Y": 25 Dez 2024
+                                        - "l, d F Y": sexta-feira, 25 Dezembro 2024
+                                        -->
+                                        {{ tarefa.data_limite|date:"d/m/Y" }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Ações -->
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'detalhe_tarefa' tarefa.pk %}" 
+                                           class="btn btn-outline-info"
+                                           title="Ver detalhes">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'editar_tarefa' tarefa.pk %}" 
+                                           class="btn btn-outline-primary"
+                                           title="Editar">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'excluir_tarefa' tarefa.pk %}" 
+                                           class="btn btn-outline-danger"
+                                           title="Excluir">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Contador de resultados -->
+            <div class="text-muted text-center">
+                <!-- 
+                |length: retorna o tamanho de uma lista
+                -->
+                Exibindo {{ tarefas|length }} tarefa(s)
+            </div>
+        {% else %}
+            <!-- Mensagem quando não há tarefas -->
+            <div class="text-center py-5">
+                <i class="bi bi-inbox display-1 text-muted"></i>
+                <p class="mt-3 text-muted">
+                    {% if filtro_status != 'todas' or filtro_prioridade or filtro_categoria %}
+                        Nenhuma tarefa encontrada com os filtros selecionados.
+                    {% else %}
+                        Nenhuma tarefa cadastrada ainda.
+                    {% endif %}
+                </p>
+                <a href="{% url 'criar_tarefa' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Criar nova tarefa
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

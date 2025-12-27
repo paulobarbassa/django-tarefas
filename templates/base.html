@@ -1,0 +1,199 @@
+<!--
+{% comment %}
+=============================================================================
+BASE.HTML - Template Base (Layout Principal)
+=============================================================================
+
+Este é o template BASE que todos os outros templates herdam.
+O Django usa um sistema de HERANÇA DE TEMPLATES que permite:
+- Definir uma estrutura comum (header, footer, navegação)
+- Cada página sobrescreve apenas as partes que precisa
+
+CONCEITOS IMPORTANTES:
+1. {% block nome %}...{% endblock %}: define uma área sobrescrevível
+2. {% extends 'base.html' %}: herda de outro template
+3. {{ variavel }}: exibe o valor de uma variável
+4. {% tag %}: executa lógica (if, for, url, etc.)
+{% endcomment %}
+-->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <!-- Meta tags básicas -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 
+    BLOCK TITLE: permite que cada página defina seu próprio título
+    Sintaxe: {% block nome %}conteúdo padrão{% endblock %}
+    -->
+    <title>{% block title %}Gerenciador de Tarefas{% endblock %}</title>
+    
+    <!-- Bootstrap CSS (framework de estilos) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- 
+    BLOCK EXTRA_CSS: permite adicionar CSS extra em páginas específicas
+    -->
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* Estilos customizados */
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        .tarefa-concluida {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        .prioridade-alta {
+            border-left: 4px solid #dc3545;
+        }
+        .prioridade-media {
+            border-left: 4px solid #ffc107;
+        }
+        .prioridade-baixa {
+            border-left: 4px solid #28a745;
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+    =================================================================
+    NAVEGAÇÃO
+    =================================================================
+    Barra de navegação fixa no topo
+    -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <!-- 
+            {% comment %}
+            {% url 'nome' %}: gera a URL para a rota com esse nome
+            Definido em urls.py: path('', views.index, name='index'){% endcomment %}
+            -->
+            <a class="navbar-brand" href="{% url 'index' %}">
+                📋 Tarefas
+            </a>
+            
+            <!-- Botão hambúrguer para telas pequenas -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'index' %}">
+                            <i class="bi bi-house"></i> Início
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_tarefas' %}">
+                            <i class="bi bi-list-task"></i> Tarefas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'criar_tarefa' %}">
+                            <i class="bi bi-plus-circle"></i> Nova Tarefa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lista_categorias' %}">
+                            <i class="bi bi-tags"></i> Categorias
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Link para o Admin -->
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/" target="_blank">
+                            <i class="bi bi-gear"></i> Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 
+    =================================================================
+    CONTEÚDO PRINCIPAL
+    =================================================================
+    -->
+    <main class="container">
+        <!-- 
+        MENSAGENS FLASH
+        ================
+        O Django tem um sistema de mensagens que permite passar
+        informações entre requisições (ex: "Tarefa criada com sucesso!")
+        
+        Níveis de mensagem:
+        - debug: informações de debug
+        - info: informações gerais
+        - success: sucesso
+        - warning: aviso
+        - error: erro
+        -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    <!-- 
+                    message.tags: classe CSS baseada no nível (success, error, etc.)
+                    message: texto da mensagem
+                    -->
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <!-- 
+        BLOCK CONTENT: área principal do conteúdo
+        Cada página que herda este template define seu próprio conteúdo aqui
+        -->
+        {% block content %}
+        <!-- Conteúdo da página vai aqui -->
+        {% endblock %}
+    </main>
+    
+    <!-- 
+    =================================================================
+    RODAPÉ
+    =================================================================
+    -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center text-muted">
+            <p class="mb-1">
+                📋 Gerenciador de Tarefas - Projeto Educativo Django
+            </p>
+            <p class="mb-0">
+                <small>
+                    Feito com ❤️ para aprender Django |
+                    <a href="https://docs.djangoproject.com/" target="_blank">
+                        Documentação Django
+                    </a>
+                </small>
+            </p>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- 
+    BLOCK EXTRA_JS: permite adicionar JavaScript extra em páginas específicas
+    -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

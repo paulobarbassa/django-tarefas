@@ -1,0 +1,48 @@
+# =============================================================================
+# REQUIREMENTS.TXT - Dependências do Projeto
+# =============================================================================
+#
+# Este arquivo lista todas as bibliotecas Python necessárias para o projeto.
+# Para instalar todas as dependências, execute:
+#
+#     pip install -r requirements.txt
+#
+# Para criar este arquivo automaticamente a partir do ambiente atual:
+#
+#     pip freeze > requirements.txt
+#
+# BOAS PRÁTICAS:
+# - Use versões específicas em produção para evitar quebras
+# - Use ambientes virtuais (venv) para isolar dependências
+# - Atualize dependências regularmente para segurança
+#
+# AMBIENTES VIRTUAIS:
+#     python -m venv venv           # Cria ambiente virtual
+#     venv\Scripts\activate         # Ativa (Windows)
+#     source venv/bin/activate      # Ativa (Linux/Mac)
+#     pip install -r requirements.txt  # Instala dependências
+# =============================================================================
+
+# Django - Framework web principal
+# https://www.djangoproject.com/
+Django>=4.2,<5.0
+
+# Outras dependências úteis (opcionais):
+
+# django-debug-toolbar - Barra de debug para desenvolvimento
+# django-debug-toolbar>=4.0
+
+# Pillow - Processamento de imagens (para ImageField)
+# Pillow>=10.0
+
+# python-dotenv - Carrega variáveis de ambiente de arquivo .env
+# python-dotenv>=1.0
+
+# gunicorn - Servidor WSGI para produção
+# gunicorn>=21.0
+
+# psycopg2-binary - Driver PostgreSQL
+# psycopg2-binary>=2.9
+
+# whitenoise - Servir arquivos estáticos em produção
+# whitenoise>=6.0

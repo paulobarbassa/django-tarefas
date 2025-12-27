@@ -1,0 +1,165 @@
+<!--
+=============================================================================
+DETALHE.HTML - Detalhes de uma Tarefa
+=============================================================================
+
+Página que exibe todos os detalhes de uma tarefa específica.
+Usado pela TarefaDetailView (Class-Based View).
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}{{ tarefa.titulo }} - Detalhes{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <!-- Navegação (breadcrumb) -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'index' %}">Início</a>
+                </li>
+                <li class="breadcrumb-item">
+                    <a href="{% url 'lista_tarefas' %}">Tarefas</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    {{ tarefa.titulo|truncatewords:5 }}
+                </li>
+            </ol>
+        </nav>
+        
+        <!-- Card principal -->
+        <div class="card {% if tarefa.concluida %}border-success{% elif tarefa.esta_atrasada %}border-danger{% endif %}">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    {% if tarefa.concluida %}
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                    {% elif tarefa.esta_atrasada %}
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                    {% else %}
+                        <i class="bi bi-circle"></i>
+                    {% endif %}
+                    
+                    <span class="{% if tarefa.concluida %}text-decoration-line-through{% endif %}">
+                        {{ tarefa.titulo }}
+                    </span>
+                </h4>
+                
+                <!-- Badges de status -->
+                <div>
+                    <span class="badge bg-{{ tarefa.categoria.cor|default:'secondary' }}">
+                        {{ tarefa.categoria.nome|default:'Sem categoria' }}
+                    </span>
+                    {% if tarefa.concluida %}
+                        <span class="badge bg-success">Concluída</span>
+                    {% elif tarefa.esta_atrasada %}
+                        <span class="badge bg-danger">Atrasada</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Pendente</span>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <!-- Descrição -->
+                <h6 class="text-muted">Descrição</h6>
+                <p class="mb-4">
+                    {% if tarefa.descricao %}
+                        <!-- 
+                        |linebreaks: converte quebras de linha em <br> e <p>
+                        |linebreaksbr: converte apenas em <br>
+                        -->
+                        {{ tarefa.descricao|linebreaks }}
+                    {% else %}
+                        <span class="text-muted fst-italic">Nenhuma descrição fornecida.</span>
+                    {% endif %}
+                </p>
+                
+                <!-- Informações em grid -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Prioridade</h6>
+                        <p>
+                            {{ tarefa.emoji_prioridade }}
+                            {{ tarefa.get_prioridade_display }}
+                        </p>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <h6 class="text-muted">Data Limite</h6>
+                        <p>
+                            {% if tarefa.data_limite %}
+                                <i class="bi bi-calendar"></i>
+                                {{ tarefa.data_limite|date:"l, d \d\e F \d\e Y" }}
+                                {% if tarefa.esta_atrasada %}
+                                    <span class="text-danger">(Atrasada!)</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">Sem prazo definido</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Metadados -->
+                <div class="row text-muted small">
+                    <div class="col-md-4">
+                        <i class="bi bi-clock"></i> 
+                        <strong>Criada em:</strong><br>
+                        <!-- 
+                        |date: formata data
+                        |time: formata hora
+                        -->
+                        {{ tarefa.criada_em|date:"d/m/Y" }} às {{ tarefa.criada_em|time:"H:i" }}
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <i class="bi bi-pencil"></i> 
+                        <strong>Atualizada em:</strong><br>
+                        {{ tarefa.atualizada_em|date:"d/m/Y" }} às {{ tarefa.atualizada_em|time:"H:i" }}
+                    </div>
+                    
+                    <div class="col-md-4">
+                        {% if tarefa.concluida_em %}
+                            <i class="bi bi-check-circle"></i> 
+                            <strong>Concluída em:</strong><br>
+                            {{ tarefa.concluida_em|date:"d/m/Y" }} às {{ tarefa.concluida_em|time:"H:i" }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Rodapé com ações -->
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'lista_tarefas' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                    
+                    <div>
+                        <a href="{% url 'alternar_status' tarefa.pk %}" 
+                           class="btn {% if tarefa.concluida %}btn-warning{% else %}btn-success{% endif %}">
+                            {% if tarefa.concluida %}
+                                <i class="bi bi-arrow-counterclockwise"></i> Reabrir
+                            {% else %}
+                                <i class="bi bi-check"></i> Concluir
+                            {% endif %}
+                        </a>
+                        
+                        <a href="{% url 'editar_tarefa' tarefa.pk %}" class="btn btn-primary">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        
+                        <a href="{% url 'excluir_tarefa' tarefa.pk %}" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Excluir
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,256 @@
+<!--
+=============================================================================
+INDEX.HTML - Página Inicial (Dashboard)
+=============================================================================
+
+Esta página exibe um painel com estatísticas e visão geral das tarefas.
+
+HERANÇA DE TEMPLATE:
+- { extends 'base.html' }: herda o layout do template base
+- { block content }: sobrescreve apenas a área de conteúdo
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}Início - Gerenciador de Tarefas{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Título da página -->
+    <div class="col-12 mb-4">
+        <h1>
+            <i class="bi bi-house"></i> 
+            Bem-vindo ao Gerenciador de Tarefas!
+        </h1>
+        <p class="text-muted lead">
+            Um projeto educativo para aprender Django. 
+            Gerencie suas tarefas de forma simples e organizada.
+        </p>
+    </div>
+</div>
+
+<!-- 
+=================================================================
+CARDS DE ESTATÍSTICAS
+=================================================================
+Exibe contadores de tarefas usando variáveis do contexto
+-->
+<div class="row mb-4">
+    <!-- Total de Tarefas -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body text-center">
+                <h2 class="card-title display-4">
+                    <!-- 
+                    {{ variavel }}: exibe o valor de uma variável
+                    Essa variável foi passada pela view no contexto
+                    -->
+                    {{ total_tarefas }}
+                </h2>
+                <p class="card-text">
+                    <i class="bi bi-list-task"></i> Total de Tarefas
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tarefas Pendentes -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body text-center">
+                <h2 class="card-title display-4">{{ tarefas_pendentes }}</h2>
+                <p class="card-text">
+                    <i class="bi bi-hourglass-split"></i> Pendentes
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tarefas Concluídas -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body text-center">
+                <h2 class="card-title display-4">{{ tarefas_concluidas }}</h2>
+                <p class="card-text">
+                    <i class="bi bi-check-circle"></i> Concluídas
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tarefas Atrasadas -->
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-danger h-100">
+            <div class="card-body text-center">
+                <h2 class="card-title display-4">{{ tarefas_atrasadas }}</h2>
+                <p class="card-text">
+                    <i class="bi bi-exclamation-triangle"></i> Atrasadas
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- 
+    =================================================================
+    ÚLTIMAS TAREFAS
+    =================================================================
+    -->
+    <div class="col-md-8 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history"></i> Últimas Tarefas
+                </h5>
+                <a href="{% url 'criar_tarefa' %}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus"></i> Nova
+                </a>
+            </div>
+            <div class="card-body">
+                {% comment %}
+                { % if % }: condição (igual ao if do Python)
+                Verifica se existe pelo menos uma tarefa
+                {% endcomment %}
+                {% if ultimas_tarefas %}
+                    <ul class="list-group list-group-flush">
+                        {% comment %}
+                        { % for item in lista % }: loop (igual ao for do Python)
+                        Itera sobre cada tarefa na lista
+                        {% endcomment %}
+                        {% for tarefa in ultimas_tarefas %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center 
+                                       {% if tarefa.concluida %}tarefa-concluida{% endif %}
+                                       prioridade-{{ tarefa.prioridade }}">
+                                <div>
+                                    {% comment %}
+                                    { % if condição % }...{ % endif % }: if simples
+                                    { % if c1 % }...{ % elif c2 % }...{ % else % }...{ % endif % }: if completo
+                                    {% endcomment %}
+                                    {% if tarefa.concluida %}
+                                        <i class="bi bi-check-circle-fill text-success"></i>
+                                    {% else %}
+                                        <i class="bi bi-circle text-muted"></i>
+                                    {% endif %}
+                                    
+                                    {% comment %}
+                                    { % url 'nome' parametro % }: gera URL com parâmetro
+                                    tarefa.pk é a chave primária (ID) da tarefa
+                                    {% endcomment %}
+                                    <a href="{% url 'detalhe_tarefa' tarefa.pk %}" 
+                                       class="text-decoration-none">
+                                        {{ tarefa.titulo }}
+                                    </a>
+                                    
+                                    <!-- Exibe a categoria se existir -->
+                                    {% if tarefa.categoria %}
+                                        <span class="badge bg-{{ tarefa.categoria.cor }} ms-2">
+                                            {{ tarefa.categoria.nome }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div>
+                                    <!-- Emoji de prioridade (método/property do model) -->
+                                    <span title="Prioridade: {{ tarefa.get_prioridade_display }}">
+                                        {{ tarefa.emoji_prioridade }}
+                                    </span>
+                                    
+                                    <!-- Botão para alternar status -->
+                                    <a href="{% url 'alternar_status' tarefa.pk %}" 
+                                       class="btn btn-sm btn-outline-secondary"
+                                       title="{% if tarefa.concluida %}Marcar como pendente{% else %}Marcar como concluída{% endif %}">
+                                        {% if tarefa.concluida %}
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                        {% else %}
+                                            <i class="bi bi-check"></i>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <!-- Mensagem quando não há tarefas -->
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-inbox display-4"></i>
+                        <p class="mt-2">Nenhuma tarefa cadastrada ainda.</p>
+                        <a href="{% url 'criar_tarefa' %}" class="btn btn-primary">
+                            <i class="bi bi-plus"></i> Criar primeira tarefa
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if ultimas_tarefas %}
+                <div class="card-footer text-center">
+                    <a href="{% url 'lista_tarefas' %}" class="btn btn-outline-primary">
+                        Ver todas as tarefas
+                        <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- 
+    =================================================================
+    AÇÕES RÁPIDAS
+    =================================================================
+    -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-lightning"></i> Ações Rápidas
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'criar_tarefa' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Nova Tarefa
+                    </a>
+                    <a href="{% url 'lista_tarefas' %}?status=pendentes" class="btn btn-warning">
+                        <i class="bi bi-hourglass-split"></i> Ver Pendentes
+                    </a>
+                    <a href="{% url 'lista_tarefas' %}?status=concluidas" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Ver Concluídas
+                    </a>
+                    <a href="{% url 'lista_categorias' %}" class="btn btn-info">
+                        <i class="bi bi-tags"></i> Categorias
+                    </a>
+                    <a href="/admin/" class="btn btn-secondary" target="_blank">
+                        <i class="bi bi-gear"></i> Painel Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card informativo sobre o projeto -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-info-circle"></i> Sobre o Projeto
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text small">
+                    Este é um projeto educativo criado para ensinar os conceitos 
+                    fundamentais do Django:
+                </p>
+                <ul class="small">
+                    <li>Models (banco de dados)</li>
+                    <li>Views (lógica de negócio)</li>
+                    <li>Templates (interface)</li>
+                    <li>Forms (formulários)</li>
+                    <li>Admin (painel administrativo)</li>
+                    <li>URLs (roteamento)</li>
+                </ul>
+                <p class="card-text small text-muted">
+                    📖 Todos os arquivos estão comentados!
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

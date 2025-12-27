@@ -1,0 +1,69 @@
+<!--
+=============================================================================
+EXCLUIR.HTML - Confirmação de Exclusão
+=============================================================================
+
+Página de confirmação antes de excluir uma tarefa.
+É uma boa prática sempre pedir confirmação antes de ações destrutivas!
+-->
+
+{% extends 'base.html' %}
+
+{% block title %}Excluir Tarefa{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Confirmar Exclusão
+                </h4>
+            </div>
+            
+            <div class="card-body text-center">
+                <i class="bi bi-trash display-1 text-danger"></i>
+                
+                <h5 class="mt-3">
+                    Tem certeza que deseja excluir esta tarefa?
+                </h5>
+                
+                <div class="alert alert-secondary mt-3">
+                    <strong>{{ tarefa.titulo }}</strong>
+                    {% if tarefa.descricao %}
+                        <br>
+                        <small class="text-muted">
+                            {{ tarefa.descricao|truncatewords:20 }}
+                        </small>
+                    {% endif %}
+                </div>
+                
+                <p class="text-danger">
+                    <i class="bi bi-exclamation-circle"></i>
+                    Esta ação não pode ser desfeita!
+                </p>
+            </div>
+            
+            <div class="card-footer">
+                <!-- 
+                Formulário de exclusão
+                POST é necessário para ações que modificam dados
+                Nunca use GET para deletar!
+                -->
+                <form method="POST" class="d-flex justify-content-between">
+                    {% csrf_token %}
+                    
+                    <a href="{% url 'lista_tarefas' %}" class="btn btn-secondary">
+                        <i class="bi bi-x"></i> Cancelar
+                    </a>
+                    
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Sim, Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
