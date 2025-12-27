@@ -1,5 +1,7 @@
 # 📋 Gerenciador de Tarefas - Projeto Django Educativo
 
+[![Django CI](https://github.com/seu-usuario/seu-repositorio/actions/workflows/django-ci.yml/badge.svg)](https://github.com/seu-usuario/seu-repositorio/actions/workflows/django-ci.yml)
+
 Este é um projeto Django **100% comentado** criado para fins educativos.
 Cada arquivo contém explicações detalhadas sobre o funcionamento do Django.
 
@@ -143,9 +145,50 @@ python manage.py runserver
 # Abrir shell interativo
 python manage.py shell
 
+# Executar testes automatizados
+python manage.py test
+
+# Executar testes com cobertura
+coverage run manage.py test
+coverage report
+
 # Coletar arquivos estáticos (produção)
 python manage.py collectstatic
 ```
+
+## 🧪 Testes Automatizados
+
+O projeto inclui 30 testes automatizados que cobrem:
+
+- **Models**: Criação, métodos e relacionamentos
+- **Views**: Requisições GET/POST, filtros e redirecionamentos
+- **Forms**: Validação de campos obrigatórios e regras de negócio
+- **Integração**: Fluxos completos de criação e edição
+
+```bash
+# Rodar todos os testes
+python manage.py test
+
+# Rodar testes com detalhes
+python manage.py test --verbosity=2
+
+# Rodar testes de uma app específica
+python manage.py test tarefas
+```
+
+## 🔄 CI/CD com GitHub Actions
+
+O projeto utiliza GitHub Actions para Integração Contínua:
+
+- ✅ Testes em múltiplas versões do Python (3.10, 3.11, 3.12)
+- ✅ Verificação de código com Flake8 (linting)
+- ✅ Verificação de migrações pendentes
+- ✅ Análise de segurança com Bandit e pip-audit
+- ✅ Cobertura de testes com Coverage
+
+O workflow é executado automaticamente em:
+- Push para branches `main` ou `develop`
+- Pull Requests para branches `main` ou `develop`
 
 ## 🐚 Exemplos no Shell
 
