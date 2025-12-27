@@ -554,6 +554,11 @@ def popular_tarefas_estudo(sender, **kwargs):
     if sender.name != 'tarefas':
         return
     
+    # Não executa durante testes automatizados
+    import sys
+    if 'test' in sys.argv:
+        return
+    
     # Importa os models aqui dentro para evitar import circular
     from .models import Tarefa, Categoria
     
