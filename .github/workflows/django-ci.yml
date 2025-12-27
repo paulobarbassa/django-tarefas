@@ -1,0 +1,151 @@
+# =============================================================================
+# GITHUB ACTIONS - CI/CD para Projeto Django
+# =============================================================================
+# Este workflow é executado automaticamente quando:
+# - Há um push para as branches main ou develop
+# - Uma Pull Request é aberta para main ou develop
+#
+# O que ele faz:
+# 1. Configura o ambiente Python
+# 2. Instala as dependências
+# 3. Executa verificações de código (linting)
+# 4. Roda os testes automatizados
+# 5. Verifica as migrações do Django
+
+name: Django CI
+
+# Gatilhos: quando o workflow deve ser executado
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+# Variáveis de ambiente globais
+env:
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  # ===========================================================================
+  # JOB: Build e Teste
+  # ===========================================================================
+  build-and-test:
+    name: Build e Teste
+    runs-on: ubuntu-latest
+    
+    # Estratégia de matriz: permite testar em múltiplas versões do Python
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+    
+    steps:
+      # -----------------------------------------------------------------------
+      # Passo 1: Checkout do código
+      # -----------------------------------------------------------------------
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+      
+      # -----------------------------------------------------------------------
+      # Passo 2: Configurar Python
+      # -----------------------------------------------------------------------
+      - name: 🐍 Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'  # Cache das dependências para builds mais rápidos
+      
+      # -----------------------------------------------------------------------
+      # Passo 3: Instalar dependências
+      # -----------------------------------------------------------------------
+      - name: 📦 Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          # Instala dependências de teste
+          pip install flake8 coverage
+      
+      # -----------------------------------------------------------------------
+      # Passo 4: Verificar código com Flake8 (Linting)
+      # -----------------------------------------------------------------------
+      - name: 🔍 Verificar código com Flake8
+        run: |
+          # Para erros de sintaxe e problemas críticos
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=Lib,venv,.git,__pycache__,migrations
+          # Verifica complexidade e estilo (avisos, não bloqueia)
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=Lib,venv,.git,__pycache__,migrations
+      
+      # -----------------------------------------------------------------------
+      # Passo 5: Verificar migrações do Django
+      # -----------------------------------------------------------------------
+      - name: 🗃️ Verificar migrações
+        run: |
+          python manage.py makemigrations --check --dry-run
+        env:
+          SECRET_KEY: 'github-actions-secret-key-for-testing'
+          DEBUG: 'True'
+      
+      # -----------------------------------------------------------------------
+      # Passo 6: Executar migrações
+      # -----------------------------------------------------------------------
+      - name: 🔄 Aplicar migrações
+        run: |
+          python manage.py migrate
+        env:
+          SECRET_KEY: 'github-actions-secret-key-for-testing'
+          DEBUG: 'True'
+      
+      # -----------------------------------------------------------------------
+      # Passo 7: Executar testes
+      # -----------------------------------------------------------------------
+      - name: ✅ Executar testes
+        run: |
+          coverage run --source='.' manage.py test
+          coverage report
+        env:
+          SECRET_KEY: 'github-actions-secret-key-for-testing'
+          DEBUG: 'True'
+      
+      # -----------------------------------------------------------------------
+      # Passo 8: Verificar sistema Django
+      # -----------------------------------------------------------------------
+      - name: 🏥 Verificar sistema Django
+        run: |
+          python manage.py check
+        env:
+          SECRET_KEY: 'github-actions-secret-key-for-testing'
+          DEBUG: 'True'
+
+  # ===========================================================================
+  # JOB: Análise de Segurança (opcional, roda em paralelo)
+  # ===========================================================================
+  security-check:
+    name: Verificação de Segurança
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      
+      - name: 📦 Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install safety bandit
+      
+      - name: 🔒 Verificar vulnerabilidades nas dependências
+        run: |
+          pip install pip-audit
+          pip-audit || true  # Não falha o build, apenas avisa
+        continue-on-error: true
+      
+      - name: 🛡️ Análise de segurança do código com Bandit
+        run: |
+          bandit -r . -x ./Lib,./venv,./.git,./migrations -ll || true
+        continue-on-error: true
