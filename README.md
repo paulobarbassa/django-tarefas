@@ -1,7 +1,5 @@
 # 📋 Gerenciador de Tarefas - Projeto Django Educativo
 
-[![Django CI](https://github.com/seu-usuario/seu-repositorio/actions/workflows/django-ci.yml/badge.svg)](https://github.com/seu-usuario/seu-repositorio/actions/workflows/django-ci.yml)
-
 Este é um projeto Django **100% comentado** criado para fins educativos.
 Cada arquivo contém explicações detalhadas sobre o funcionamento do Django.
 
@@ -24,10 +22,26 @@ um sistema de gerenciamento de tarefas (To-Do List).
 
 ### 1. Pré-requisitos
 
-- Python 3.10 ou superior
+- Python 3.14 ou superior
 - pip (gerenciador de pacotes Python)
+- Git
 
-### 2. Criar ambiente virtual (recomendado)
+> 💡 **Sobre o banco de dados**: Este projeto usa **SQLite**, que já vem embutido no Python. Não é necessário instalar nenhum banco de dados separado! O arquivo `db.sqlite3` será criado automaticamente ao executar as migrações.
+
+#### Instalação do Python 3.14 (Windows via WinGet)
+
+```powershell
+winget install -e --id Python.Python.3.14 --scope machine
+```
+
+### 2. Clonar o repositório
+
+```bash
+git clone https://github.com/paulobarbassa/django-tarefas.git
+cd django-tarefas
+```
+
+### 3. Criar ambiente virtual (recomendado)
 
 ```bash
 # Criar ambiente virtual
@@ -40,31 +54,31 @@ venv\Scripts\activate
 source venv/bin/activate
 ```
 
-### 3. Instalar dependências
+### 4. Instalar dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Aplicar migrações (criar banco de dados)
+### 5. Aplicar migrações (criar banco de dados)
 
 ```bash
 python manage.py migrate
 ```
 
-### 5. Criar superusuário (para acessar o admin)
+### 6. Criar superusuário (para acessar o admin)
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### 6. Executar o servidor
+### 7. Executar o servidor
 
 ```bash
 python manage.py runserver
 ```
 
-### 7. Acessar o projeto
+### 8. Acessar o projeto
 
 - **Site**: http://localhost:8000/
 - **Admin**: http://localhost:8000/admin/
